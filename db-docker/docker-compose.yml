@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  database:
+    build:
+      context: "./bin/mysql8"
+    container_name: "mysql8"
+    restart: "always"
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - ./config/initdb:/docker-entrypoint-initdb.d
+      - ./data/mysql:/var/lib/mysql
+      - ./logs/mysql:/var/log/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "tiger"
+      MYSQL_DATABASE: "docker"
+      MYSQL_USER: "docker"
+      MYSQL_PASSWORD: "docker"
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: "phpmyadmin"
+    links:
+      - database
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: "tiger"
+      MYSQL_ROOT_PASSWORD: "tiger"
+      MYSQL_USER: "docker"
+      MYSQL_PASSWORD: "docker"
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - /sessions
+      - ./config/php/php.ini:/usr/local/etc/php/conf.d/php-phpmyadmin.ini
